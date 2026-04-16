@@ -21,8 +21,8 @@ class GeminiClient:
     Minimal Gemini API wrapper with added error resilience.
 
     Requirements:
-    - google-generativeai installed
-    - GEMINI_API_KEY set in environment (or loaded via python-dotenv)
+    - google-generativeai installed #deprecated, replaced by google-genai
+    - GEMINI_API_KEY set in environment (or loaded via python-dotenv) #confirmed its in .env and the key is in quotes
     """
 
     def __init__(self, model_name: str = "gemini-2.5-flash", temperature: float = 0.2):
@@ -33,10 +33,17 @@ class GeminiClient:
             )
 
         # Import here so heuristic mode doesn't require the dependency at import time.
-        import google.generativeai as genai
+        #import google.generativeai as genai
+        import google.genai as genai #added since above is deprecated
 
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model_name)
+
+
+        #genai.configure(api_key=api_key)
+        #self.model = genai.GenerativeModel(model_name)
+        
+        key = api_key or os.environ.get("GEMINI_API_KEY")
+        self.client = genai.Client(api_key=key)
+        self.model = model_name
         self.temperature = float(temperature)
 
     def complete(self, system_prompt: str, user_prompt: str) -> str:
@@ -44,22 +51,27 @@ class GeminiClient:
         Sends a single request to Gemini.
 
         UPDATED: Added try/except to handle rate limits and API errors gracefully.
-        If an error occurs, it returns an empty string, triggering the agent's 
+        If an error occurs, it returns an empty string, triggering the agent's
         heuristic fallback logic.
         """
+        # from google.genai import types  # re-enable when using GenerateContentConfig
+
+        # Gemma models don't support system_instruction, so we prepend it directly.
+        combined = f"{system_prompt}\n\n{user_prompt}"
+
         try:
-            response = self.model.generate_content(
-                [
-                    {"role": "system", "parts": [system_prompt]},
-                    {"role": "user", "parts": [user_prompt]},
-                ],
-                generation_config={"temperature": self.temperature},
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=combined,
+                # config=types.GenerateContentConfig(
+                #     temperature=self.temperature,  # re-enable to tune response style
+                # ),
             )
 
             # Defensive: response.text can be None or raise an error if blocked by filters.
             return response.text or ""
-            
+
         except Exception as e:
-            # Returning empty string allows the agent to detect the failure 
+            # Returning empty string allows the agent to detect the failure
             # and switch to offline rules.
             return ""

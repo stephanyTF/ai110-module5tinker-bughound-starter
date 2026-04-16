@@ -87,8 +87,8 @@ if mode == "Gemini (requires API key)":
     st.sidebar.warning("⚠️ Gemini Free Tier: You have a limit of ~20 requests. Use Heuristic mode for initial testing to save your quota.")
 
 model_name = st.sidebar.selectbox(
-    "Gemini model",
-    ["gemini-2.5-flash", "gemini-2.5-pro"], # Reverting to existing version names from llm_client.py
+    "Model",
+    ["gemma-3-1b-it", "gemini-2.5-flash", "gemini-2.5-pro"],
     disabled=(mode != "Gemini (requires API key)"),
 )
 
