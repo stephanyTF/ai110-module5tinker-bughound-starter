@@ -63,6 +63,22 @@ def assess_risk(
         reasons.append("Bare except was modified, verify correctness.")
 
     # ----------------------------
+    # Dangerous patterns introduced by the fix
+    # ----------------------------
+    dangerous_patterns = [
+        "eval(",
+        "exec(",
+        "os.system(",
+        "subprocess",
+        "shutil.rmtree",
+        "os.remove",
+    ]
+    for pattern in dangerous_patterns:
+        if pattern not in original_code and pattern in fixed_code:
+            score -= 30
+            reasons.append(f"Fix introduces potentially dangerous pattern: '{pattern}'")
+
+    # ----------------------------
     # Clamp score
     # ----------------------------
     score = max(0, min(100, score))
