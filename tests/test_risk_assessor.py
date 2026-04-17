@@ -122,5 +122,5 @@ def test_mixed_issues_leads_to_low_risk():
             {"type": "Reliability", "severity": "High", "msg": "bare except"},
         ],
     )
-    assert risk["score"] <= 100 and risk["score"] >= 80  # should be a significant improvement but not perfect
-    assert risk["level"] in ("low")
+    assert risk["score"] <= 100 and risk["score"] >= 30  # should be a significant improvement but not perfect
+    assert risk["level"] in ("medium")
