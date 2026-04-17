@@ -86,9 +86,9 @@ def assess_risk(
     # ----------------------------
     # Risk level
     # ----------------------------
-    if score >= 75:
+    if score >= 60: #loosen the risk level thresholds from 75 --> 60
         level = "low"
-    elif score >= 40:
+    elif score >= 30: #loosen as well 40 --> 30
         level = "medium"
     else:
         level = "high"
