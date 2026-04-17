@@ -47,3 +47,20 @@ def test_mock_client_forces_llm_fallback_to_heuristics_for_analysis():
     assert any(issue.get("type") == "Code Quality" for issue in result["issues"])
     # Ensure we logged the fallback path
     assert any("Falling back to heuristics" in entry.get("message", "") for entry in result["logs"])
+
+
+from sample_code.cleanish import add
+
+def test_cleanish_add_returns_correct_sum():
+    assert add(2, 3) == 5
+    assert add(-1, 1) == 0
+    #passed
+
+def test_agent_finds_no_issues_in_cleanish():
+    from bughound_agent import BugHoundAgent
+    code = open("sample_code/cleanish.py").read()
+    agent = BugHoundAgent(client=None)
+    result = agent.run(code)
+    assert not any(i.get("type") == "Code Quality" for i in result["issues"])
+    #passed
+
