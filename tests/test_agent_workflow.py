@@ -49,7 +49,18 @@ def test_mock_client_forces_llm_fallback_to_heuristics_for_analysis():
     assert any("Falling back to heuristics" in entry.get("message", "") for entry in result["logs"])
 
 
-#test MockClient on cleanish.py file
-# def test_mock_client_on_cleanish_code():
-#     agent = BugHoundAgent(client=MockClient())
-#     code = open
+from sample_code.cleanish import add
+
+def test_cleanish_add_returns_correct_sum():
+    assert add(2, 3) == 5
+    assert add(-1, 1) == 0
+    #passed
+
+def test_agent_finds_no_issues_in_cleanish():
+    from bughound_agent import BugHoundAgent
+    code = open("sample_code/cleanish.py").read()
+    agent = BugHoundAgent(client=MockClient())
+    result = agent.run(code)
+    assert not any(i.get("type") == "Code Quality" for i in result["issues"])
+    #passed
+
