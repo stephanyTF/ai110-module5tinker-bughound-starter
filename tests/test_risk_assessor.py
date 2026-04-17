@@ -36,6 +36,30 @@ def test_high_severity_issue_drives_score_down():
     assert risk["level"] in ("medium", "high")
 
 
+def test_dangerous_pattern_introduced_by_fix_is_penalized():
+    original = "def run(cmd):\n    return None\n"
+    fixed = "import os\ndef run(cmd):\n    os.system(cmd)\n"
+    risk = assess_risk(
+        original_code=original,
+        fixed_code=fixed,
+        issues=[],
+    )
+    assert risk["score"] <= 70
+    assert any("os.system(" in r for r in risk["reasons"])
+    assert risk["should_autofix"] is False
+
+
+def test_dangerous_pattern_not_penalized_if_already_in_original():
+    original = "import os\ndef run(cmd):\n    os.system(cmd)\n"
+    fixed = "import os\ndef run(cmd):\n    os.system(cmd)  # unchanged\n"
+    risk = assess_risk(
+        original_code=original,
+        fixed_code=fixed,
+        issues=[],
+    )
+    assert not any("os.system(" in r for r in risk["reasons"])
+
+
 def test_missing_return_is_penalized():
     original = "def f(x):\n    return x + 1\n"
     fixed = "def f(x):\n    x + 1\n"
