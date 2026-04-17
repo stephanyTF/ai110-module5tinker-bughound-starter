@@ -4,6 +4,11 @@ BugHound is a small, agent-style debugging tool. It analyzes a Python code snipp
 
 ---
 
+# TF Summary
+The core concepts students need to understand are agentic systems structure and how to do meaningful testing that may help identify needed guardrails or adjustments to improve the system. Unless this is fixed before the session, how the model call is set up currently w/ the deprecated version (```import google.generativeai```), will confuse and take away the main focus of the Tinker activity from students as they will need to update the code structure. Sometimes AI (Claude) was helpful to reimplement the api call w/ the newer version but in my experience, it wasn’t perfect and I had to read the docs and the code to make sure I put in the right set up. Also since theres a lot of files in this code, making sure the students understand what each file does is crucial especially when it comes to testing different features and part. AI (inline code) or Claude may be misleading or take a while to help out the student if it’s missing out on context (such as sample code files). 
+
+---
+
 ## What BugHound Does
 
 Given a short Python snippet, BugHound:
