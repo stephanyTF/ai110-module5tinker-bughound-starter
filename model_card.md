@@ -7,9 +7,9 @@ Fill this out after you run BugHound in **both** modes (Heuristic and Gemini).
 ## 1) What is this system?
 
 **Name:** BugHound  
-**Purpose:** Analyze a Python snippet, propose a fix, and run reliability checks before suggesting whether the fix should be auto-applied.
-
+**Purpose:** The BugHound reviews a Python snippet, propose a fix, and run reliability checks before suggesting whether the fix should be auto-applied.      
 **Intended users:** Students learning agentic workflows and AI reliability concepts.
+
 
 ---
 
@@ -18,6 +18,8 @@ Fill this out after you run BugHound in **both** modes (Heuristic and Gemini).
 Describe the workflow in your own words (plan → analyze → act → test → reflect).  
 Include what is done by heuristics vs what is done by Gemini (if enabled).
 
+The workflow first starts by letting the user know its plan, then it goes to analyze the code by deteciting any issues (heuristics or LLM). After finding any issues, the BugHound proposes a fix or improved code. (for heuristics, there are pre-written suggestions for certain code issues, while Gemini may create a more tailored solution). It then checks its suggested code through the saftey check tests and deterimines whether its code is safe enough for the user to apply or needs additional human review. 
+
 ---
 
 ## 3) Inputs and outputs
@@ -25,13 +27,23 @@ Include what is done by heuristics vs what is done by Gemini (if enabled).
 **Inputs:**
 
 - What kind of code snippets did you try?
+   Correct code, mixed errors, commands that would affect the user's local env (e.g. os.system (cmd))
 - What was the “shape” of the input (short scripts, functions, try/except blocks, etc.)?
+   Short Scripts, functions meant to have a simple print output, try/except blocks
 
 **Outputs:**
 
 - What types of issues were detected?
-- What kinds of fixes were proposed?
+    - logging / testing code w/ print statements
+    - missing exception name from try / except block
+    - division by zero
+- What kinds of fixes were proposed? 
+    - replacing print statements w/ logs
+    - naming exceptions
+    - checking values of inputs to avoid division by zero
 - What did the risk report show?
+    -  Risk level, Severity Score ( 0 - 100 where 100 is the most safe), and Auto Fix (bool value (yes or no))
+
 
 ---
 
@@ -40,9 +52,18 @@ Include what is done by heuristics vs what is done by Gemini (if enabled).
 List at least **two** reliability rules currently used in `assess_risk`. For each:
 
 - What does the rule check?
+    - Rule #1: Structural change checks how much of the code was changed based on its length difference
+    - Rule #2: Issue severity based risk checks the severity score of the suggested code
+
 - Why might that check matter for safety or correctness?
+     - Rule #1: Structural change: Helps avoid implementing code that has been changed drastically in the case of affecting the user's original intention or project
+     - Rule #2: Issue severity based risk helps measure how risky the new code is and whether the user should accept it or not
 - What is a false positive this rule could cause?
+     - Rule #1: Structural change: Eventhough the BugHound may insist that the new code is acceptable because there's not much change difference from the original, this could be false if the original was very incomplete or had unnecesary / wrong extra code. 
+     - Rule #2: Issue severity based risk: Eventhough a suggested code could be cleared for a low or non existent severity score, this could be a false positive if the issue was mislabeled to be a low risk.
 - What is a false negative this rule could miss?
+    - Rule #1: Structural change:  Eventhough the BugHound may insist that the new code is not acceptable because of major changes, these structurla changes could be necessary for the code to work.
+     - Rule #2: Issue severity based risk: Eventhough a suggested code could be flagged for a high severity score, this could be a false negative if the issue was mislabeled to be a high risk.
 
 ---
 
