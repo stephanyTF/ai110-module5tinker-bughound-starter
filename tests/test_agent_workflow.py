@@ -51,16 +51,59 @@ def test_mock_client_forces_llm_fallback_to_heuristics_for_analysis():
 
 from sample_code.cleanish import add
 
+#tests 
 def test_cleanish_add_returns_correct_sum():
     assert add(2, 3) == 5
     assert add(-1, 1) == 0
     #passed
 
+
+#test mock client issue detection in cleanish.py
 def test_agent_finds_no_issues_in_cleanish():
+    '''This test ensures that the BugHoundAgent does not report any issues when analyzing the cleanish.py code,
+    which is designed to be clean.'''
     from bughound_agent import BugHoundAgent
     code = open("sample_code/cleanish.py").read()
-    agent = BugHoundAgent(client=None)
+    agent = BugHoundAgent(client=MockClient())
     result = agent.run(code)
     assert not any(i.get("type") == "Code Quality" for i in result["issues"])
     #passed
 
+
+#test MockClient issue detection in flaky_try_except.py
+def test_mock_client_detects_flaky_try_except_issue():
+    '''This test checks if the BugHoundAgent, when using the MockClient, 
+      can detect a known code quality issue (bare except) in the flaky_try_except.py code.'''
+    from bughound_agent import BugHoundAgent
+    code = open("sample_code/flaky_try_except.py").read()
+    agent = BugHoundAgent(client=MockClient())
+    result = agent.run(code)
+    print("MockClient result['issues']:", result["issues"])
+    assert any("bare" in i.get("msg", "") and "except" in i.get("msg", "") for i in result["issues"])
+    #passed
+
+
+#test MockClient issue detection for mixed_issues.py
+def test_mock_client_detects_mixed_issues():
+    '''This test verifies that the BugHoundAgent with MockClient can identify multiple types of issues in the mixed_issues.py code.'''
+    from bughound_agent import BugHoundAgent
+    code = open("sample_code/mixed_issues.py").read()
+    agent = BugHoundAgent(client=MockClient())
+    result = agent.run(code)
+    print("MockClient result['issues']:", result["issues"])
+    assert any("bare" in i.get("msg", "") and "except" in i.get("msg", "") for i in result["issues"])
+    assert any("Unfinished logic" in i.get("msg", "") for i in result["issues"])
+    #passed
+
+#test MockClient on print_spam.py
+def test_mock_client_detects_print_statements():
+    '''This test ensures that the BugHoundAgent with MockClient can detect print statements in the print_spam.py code, which is a code quality issue.'''
+    from bughound_agent import BugHoundAgent
+    code = open("sample_code/print_spam.py").read()
+    agent = BugHoundAgent(client=MockClient())
+    result = agent.run(code)
+    print("MockClient result['issues']:", result["issues"])
+    assert any("print statements" in i.get("msg", "") for i in result["issues"])
+    #passed
+   
+    
